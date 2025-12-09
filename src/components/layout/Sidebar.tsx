@@ -102,6 +102,8 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 space-y-1 px-3 py-4">
           {menuItems.map((item) => {
+            // Show /classes only to admin users
+            if (item.path === "/classes" && userRole?.role !== "admin") return null;
             const isActive = location.pathname === item.path;
             return (
               <NavLink
