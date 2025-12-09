@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useSubjects, useAddSubject, useUpdateSubject, useDeleteSubject } from "@/hooks/useSupabaseData";
+import { useSubjects, useAddSubject, useUpdateSubject, useDeleteSubject, useStudents, useClasses } from "@/hooks/useSupabaseData";
 import { useIsAdmin } from "@/hooks/useAdminData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -34,13 +35,16 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, BookOpen, Loader2, ShieldAlert, ArrowUp, ArrowDown } from "lucide-react";
 
+
 interface SubjectForm {
   nama: string;
   kode: string;
+  kelas: string[];
 }
 
 export default function Subjects() {
   const { data: subjects = [], isLoading } = useSubjects();
+  const { data: students = [] } = useStudents();
   const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
   const addSubject = useAddSubject();
   const updateSubject = useUpdateSubject();
@@ -48,17 +52,23 @@ export default function Subjects() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState<string | null>(null);
-  const [form, setForm] = useState<SubjectForm>({ nama: "", kode: "" });
+  const [form, setForm] = useState<SubjectForm>({ nama: "", kode: "", kelas: [] });
 
   const resetForm = () => {
-    setForm({ nama: "", kode: "" });
+    setForm({ nama: "", kode: "", kelas: [] });
     setEditingSubject(null);
   };
 
-  const handleOpenDialog = (subject?: { id: string; nama: string; kode: string }) => {
+  // Prefer explicit classes table if available, otherwise fall back to students-derived list
+  const { data: classesFromHook = [] } = useClasses();
+  const kelasOptions = (classesFromHook && classesFromHook.length > 0)
+    ? classesFromHook.map((c: any) => c.nama)
+    : Array.from(new Set(students.map((s) => s.kelas))).sort();
+
+  const handleOpenDialog = (subject?: { id: string; nama: string; kode: string; kelas?: string[] }) => {
     if (subject) {
       setEditingSubject(subject.id);
-      setForm({ nama: subject.nama, kode: subject.kode });
+      setForm({ nama: subject.nama, kode: subject.kode, kelas: subject.kelas || [] });
     } else {
       resetForm();
     }
@@ -72,6 +82,15 @@ export default function Subjects() {
       toast({
         title: "Error",
         description: "Nama dan kode mata pelajaran harus diisi",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (form.kelas.length === 0) {
+      toast({
+        title: "Error",
+        description: "Pilih minimal satu kelas",
         variant: "destructive",
       });
       return;
@@ -215,6 +234,32 @@ export default function Subjects() {
                     maxLength={10}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>Pilih Kelas</Label>
+                  <div className="grid grid-cols-3 gap-3 rounded-md border border-input bg-background p-3">
+                    {kelasOptions.map((kelas) => (
+                      <div key={kelas} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`kelas-${kelas}`}
+                          checked={form.kelas.includes(kelas)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setForm({ ...form, kelas: [...form.kelas, kelas] });
+                            } else {
+                              setForm({
+                                ...form,
+                                kelas: form.kelas.filter((k) => k !== kelas),
+                              });
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`kelas-${kelas}`} className="font-normal cursor-pointer">
+                          {kelas}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"
@@ -246,6 +291,7 @@ export default function Subjects() {
                 <TableHead className="w-16 text-center">No</TableHead>
                 <TableHead className="w-24">Kode</TableHead>
                 <TableHead>Nama Mata Pelajaran</TableHead>
+                <TableHead>Kelas</TableHead>
                 <TableHead className="w-40 text-center">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -265,6 +311,22 @@ export default function Subjects() {
                     <TableCell className="text-center">{index + 1}</TableCell>
                     <TableCell className="font-mono font-medium">{subject.kode}</TableCell>
                     <TableCell>{subject.nama}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {subject.kelas && subject.kelas.length > 0 ? (
+                          subject.kelas.map((k) => (
+                            <span
+                              key={k}
+                              className="inline-block rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+                            >
+                              {k}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center gap-1">
                         <Button

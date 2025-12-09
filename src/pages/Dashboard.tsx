@@ -17,9 +17,21 @@ export default function Dashboard() {
   const totalStudents = students.length;
   const totalGrades = grades.length;
   const totalLocked = lockedReports.length;
-  const completionRate = totalStudents > 0 && subjects.length > 0
-    ? Math.round((totalGrades / (totalStudents * subjects.length)) * 100) 
-    : 0;
+  
+  // Calculate completion rate considering kelas-specific subjects
+  let completionRate = 0;
+  if (totalStudents > 0 && subjects.length > 0) {
+    let totalExpectedGrades = 0;
+    students.forEach((student) => {
+      const studentSubjects = subjects.filter(
+        (s) => s.kelas && s.kelas.includes(student.kelas)
+      ).length;
+      totalExpectedGrades += studentSubjects;
+    });
+    completionRate = totalExpectedGrades > 0
+      ? Math.round((totalGrades / totalExpectedGrades) * 100)
+      : 0;
+  }
 
   const recentStudents = students.slice(0, 5);
 

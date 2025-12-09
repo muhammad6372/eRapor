@@ -39,6 +39,7 @@ export interface DbSubject {
   id: string;
   nama: string;
   kode: string;
+  kelas?: string[];
   created_at: string;
 }
 
@@ -111,6 +112,12 @@ export interface DbTeacherClassAssignment {
   id: string;
   user_id: string;
   kelas: string;
+  created_at: string;
+}
+
+export interface DbClass {
+  id: string;
+  nama: string;
   created_at: string;
 }
 
@@ -233,7 +240,7 @@ export function useSubjects() {
 export function useAddSubject() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (subject: { nama: string; kode: string }) => {
+    mutationFn: async (subject: { nama: string; kode: string; kelas: string[] }) => {
       const { error } = await supabase.from("subjects").insert(subject);
       if (error) throw error;
     },
@@ -246,7 +253,7 @@ export function useAddSubject() {
 export function useUpdateSubject() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; nama?: string; kode?: string; urutan?: number }) => {
+    mutationFn: async ({ id, ...updates }: { id: string; nama?: string; kode?: string; kelas?: string[]; urutan?: number }) => {
       const { error } = await supabase
         .from("subjects")
         .update(updates)
@@ -363,6 +370,57 @@ export function useLockedReports() {
       const { data, error } = await supabase.from("locked_reports").select("*");
       if (error) throw error;
       return data as DbLockedReport[];
+    },
+  });
+}
+
+// Classes
+export function useClasses() {
+  return useQuery({
+    queryKey: ["classes"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("classes").select("*").order("nama", { ascending: true });
+      if (error) throw error;
+      return data as DbClass[];
+    },
+  });
+}
+
+export function useAddClass() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (kelas: { nama: string }) => {
+      const { error } = await supabase.from("classes").insert(kelas);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+    },
+  });
+}
+
+export function useUpdateClass() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, nama }: { id: string; nama: string }) => {
+      const { error } = await supabase.from("classes").update({ nama }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+    },
+  });
+}
+
+export function useDeleteClass() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("classes").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
     },
   });
 }

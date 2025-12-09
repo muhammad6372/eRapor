@@ -23,6 +23,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: Settings, label: "Pengaturan Sekolah", path: "/settings" },
   { icon: Users, label: "Data Siswa", path: "/students" },
+  { icon: ClipboardList, label: "Kelola Kelas", path: "/classes" },
   { icon: BookOpen, label: "Mata Pelajaran", path: "/subjects" },
   { icon: ClipboardList, label: "Input Nilai", path: "/grades" },
   { icon: Calendar, label: "Ketidakhadiran", path: "/attendance" },

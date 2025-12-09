@@ -48,6 +48,9 @@ export default function GradeInput() {
 
   const kelasList = [...new Set(students.map((s) => s.kelas))];
   const filteredStudents = students.filter((s) => s.kelas === selectedKelas);
+  const filteredSubjects = selectedKelas 
+    ? subjects.filter((s) => s.kelas && s.kelas.includes(selectedKelas))
+    : [];
   const currentSubject = subjects.find((s) => s.id === selectedSubject);
 
   const isReportLocked = (studentId: string) => {
@@ -258,11 +261,17 @@ export default function GradeInput() {
                   <SelectValue placeholder="Pilih mapel" />
                 </SelectTrigger>
                 <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id}>
-                      {subject.nama}
-                    </SelectItem>
-                  ))}
+                  {filteredSubjects.length > 0 ? (
+                    filteredSubjects.map((subject) => (
+                      <SelectItem key={subject.id} value={subject.id}>
+                        {subject.nama}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      Tidak ada mata pelajaran untuk kelas ini
+                    </div>
+                  )}
                 </SelectContent>
               </Select>
             </div>

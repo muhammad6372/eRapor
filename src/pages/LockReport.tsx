@@ -60,6 +60,24 @@ export default function LockReport() {
       ? students
       : students.filter((s) => s.kelas === filterKelas);
 
+  const getCompletionStatus = (studentId: string, studentKelas: string) => {
+    if (!schoolSettings || subjects.length === 0) return 0;
+    const kelasSubjects = subjects.filter(
+      (s) => s.kelas && s.kelas.includes(studentKelas)
+    );
+    if (kelasSubjects.length === 0) return 0;
+    const studentGrades = grades.filter(
+      (g) =>
+        g.student_id === studentId &&
+        g.semester === schoolSettings.semester &&
+        g.tahun_pelajaran === schoolSettings.tahun_pelajaran
+    );
+    const completion = Math.round(
+      (studentGrades.length / kelasSubjects.length) * 100
+    );
+    return completion;
+  };
+
   const isReportLocked = (studentId: string) => {
     if (!schoolSettings) return false;
     return lockedReports.some(
@@ -68,20 +86,6 @@ export default function LockReport() {
         r.semester === schoolSettings.semester &&
         r.tahun_pelajaran === schoolSettings.tahun_pelajaran
     );
-  };
-
-  const getCompletionStatus = (studentId: string) => {
-    if (!schoolSettings || subjects.length === 0) return 0;
-    const studentGrades = grades.filter(
-      (g) =>
-        g.student_id === studentId &&
-        g.semester === schoolSettings.semester &&
-        g.tahun_pelajaran === schoolSettings.tahun_pelajaran
-    );
-    const completion = Math.round(
-      (studentGrades.length / subjects.length) * 100
-    );
-    return completion;
   };
 
   const handleLock = async (studentId: string, studentName: string) => {
@@ -198,7 +202,7 @@ export default function LockReport() {
             <TableBody>
               {filteredStudents.length > 0 ? (
                 filteredStudents.map((student) => {
-                  const completion = getCompletionStatus(student.id);
+                  const completion = getCompletionStatus(student.id, student.kelas);
                   const isLocked = isReportLocked(student.id);
                   return (
                     <TableRow key={student.id}>

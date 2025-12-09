@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import SchoolSettings from "./pages/SchoolSettings";
 import Students from "./pages/Students";
 import Subjects from "./pages/Subjects";
+import Classes from "./pages/Classes";
 import GradeInput from "./pages/GradeInput";
 import Attendance from "./pages/Attendance";
 import ReportPreview from "./pages/ReportPreview";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><SchoolSettings /></ProtectedRoute>} />
           <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
+          <Route path="/classes" element={<ProtectedRoute><Classes /></ProtectedRoute>} />
           <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
           <Route path="/grades" element={<ProtectedRoute><GradeInput /></ProtectedRoute>} />
           <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />

@@ -85,6 +85,9 @@ export default function ReportPreview() {
   const kelasList = [...new Set(students.map((s) => s.kelas))];
   const filteredStudents = students.filter((s) => s.kelas === selectedKelas);
   const currentStudent = students.find((s) => s.id === selectedStudent);
+  const filteredSubjects = selectedKelas
+    ? subjects.filter((s) => s.kelas && s.kelas.includes(selectedKelas))
+    : [];
 
   const studentGrades = grades.filter(
     (g) =>
@@ -306,7 +309,7 @@ export default function ReportPreview() {
                     </tr>
                   </thead>
                   <tbody>
-                    {subjects.map((subject, index) => {
+                    {filteredSubjects.map((subject, index) => {
                       const grade = studentGrades.find((g) => g.subject_id === subject.id);
                       return (
                         <tr key={subject.id}>
